@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Times Table Quest</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg1:#4facfe;--bg2:#00f2fe;--accent:#ff7a59;--ink:#1d2340;--muted:#6b7394;--good:#22c55e;--bad:#ef4444;--gold:#f6b500}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:'Nunito',system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);min-height:100vh;-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0;z-index:-1;background:linear-gradient(160deg,var(--bg1),var(--bg2))}
+button{font-family:inherit;cursor:pointer;touch-action:manipulation;color:inherit}
+input,textarea{font-family:inherit}
+.wrap{max-width:980px;margin:0 auto;padding:12px 12px 40px}
+.top{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,.94);border-radius:20px;padding:10px 14px;box-shadow:0 6px 20px rgba(0,0,0,.12)}
+.avatar{font-size:32px;width:54px;height:54px;flex:none;display:grid;place-items:center;background:#eef3ff;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.15)}
+.who{flex:1;min-width:0}
+.who b{font-size:18px}
+.rank{font-size:13px;color:var(--muted);font-weight:800}
+.xpbar{height:10px;background:#e6e9f5;border-radius:99px;overflow:hidden;margin-top:4px}
+.xpbar i{display:block;height:100%;background:linear-gradient(90deg,#ffd166,#ff7a59);transition:width .6s}
+.pill{background:#fff6dc;border-radius:99px;padding:6px 12px;font-weight:900;white-space:nowrap;font-size:15px}
+.pill.blue{background:#e8f0ff}.pill.red{background:#ffe8e8}
+.iconbtn{border:none;background:#eef1fb;border-radius:12px;font-size:20px;width:42px;height:42px;flex:none}
+nav{display:flex;gap:8px;margin:12px 0;overflow-x:auto;padding-bottom:4px}
+nav button{flex:1;min-width:80px;border:none;background:rgba(255,255,255,.72);border-radius:16px;padding:8px 6px;font-weight:900;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:2px;transition:transform .15s}
+nav button span{font-size:24px}
+nav button.on{background:#fff;box-shadow:0 4px 14px rgba(0,0,0,.15);transform:translateY(-2px)}
+.card{background:#fff;border-radius:24px;padding:20px;box-shadow:0 8px 24px rgba(0,0,0,.12);margin-bottom:14px}
+h1,h2,h3{margin:.1em 0 .4em;line-height:1.15}
+h1{font-size:32px}h2{font-size:26px}
+p{line-height:1.45}
+.muted{color:var(--muted)}
+.btn{border:none;border-radius:16px;padding:14px 22px;font-size:18px;font-weight:900;background:var(--accent);color:#fff;box-shadow:0 5px 0 rgba(0,0,0,.2);transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.btn.alt{background:#eef1fb;color:var(--ink)}
+.btn.green{background:var(--good)}
+.btn.purple{background:#7c3aed}
+.btn.sm{padding:8px 14px;font-size:15px;border-radius:12px;box-shadow:0 3px 0 rgba(0,0,0,.15)}
+.btn.big{font-size:24px;padding:18px 34px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.center{text-align:center;justify-content:center}
+.grid{display:grid;gap:12px}
+.g2{grid-template-columns:repeat(auto-fit,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(130px,1fr))}
+.tile{border:none;border-radius:22px;padding:18px;text-align:left;color:#fff;box-shadow:0 6px 0 rgba(0,0,0,.18);transition:transform .1s;position:relative;overflow:hidden}
+.tile:active{transform:translateY(3px)}
+.tile .ic{font-size:44px;display:block}
+.tile b{font-size:22px;display:block}
+.tile small{font-size:14px;opacity:.95;font-weight:800}
+.t1{background:linear-gradient(135deg,#ff7a59,#ff4f8b)}.t2{background:linear-gradient(135deg,#7c3aed,#4f46e5)}.t3{background:linear-gradient(135deg,#06b6d4,#3b82f6)}.t4{background:linear-gradient(135deg,#22c55e,#0ea5a4)}.t5{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+.stat{background:#f5f7ff;border-radius:18px;padding:14px;text-align:center}
+.stat b{font-size:28px;display:block}
+.stat span{font-size:13px;color:var(--muted);font-weight:800}
+.progress{height:14px;background:#e6e9f5;border-radius:99px;overflow:hidden}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,#34d399,#22c55e);transition:width .4s}
+/* play screens */
+.play{text-align:center}
+.q{font-size:clamp(46px,11vw,84px);font-weight:900;margin:10px 0 4px;letter-spacing:1px}
+.answer-box{font-size:clamp(40px,9vw,64px);font-weight:900;min-width:150px;display:inline-block;padding:4px 22px;border-radius:18px;background:#f3f5ff;border:4px solid #dfe4fb;min-height:84px}
+.answer-box.empty{color:#c4cae4}
+.answer-box.good{background:#dcfce7;border-color:var(--good);animation:pulse .3s}
+.answer-box.bad{background:#fee2e2;border-color:var(--bad);animation:shake .35s}
+.fb{min-height:30px;font-size:22px;font-weight:900;margin:6px 0}
+.fb.good{color:var(--good)}.fb.bad{color:var(--bad)}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:330px;margin:8px auto 0}
+.pad button{border:none;height:62px;font-size:28px;font-weight:900;border-radius:16px;background:#eef1fb;box-shadow:0 4px 0 #cfd5ee}
+.pad button:active{transform:translateY(3px);box-shadow:0 1px 0 #cfd5ee}
+.pad .ok{background:var(--good);color:#fff;box-shadow:0 4px 0 #15803d}
+@keyframes pulse{50%{transform:scale(1.08)}}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.combo{font-weight:900;color:#f97316}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.chip{border:3px solid #dfe4fb;background:#fff;border-radius:14px;width:58px;height:54px;font-size:22px;font-weight:900}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.timer{font-size:46px;font-weight:900}
+.timer.low{color:var(--bad);animation:pulse .5s infinite}
+.countdown{font-size:120px;font-weight:900;color:var(--accent);animation:pulse .9s infinite}
+/* practice */
+.ttile{border:none;background:#fff;border-radius:20px;padding:14px 8px;box-shadow:0 5px 0 rgba(0,0,0,.12)}
+.ttile b{font-size:40px;display:block;color:var(--accent)}
+.stars{color:var(--gold);font-size:20px;letter-spacing:2px}
+.stars .off{color:#dde1ef}
+.tip{background:#fff8e1;border-radius:16px;padding:12px 16px;font-weight:800;margin:10px 0}
+.facts{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:12px 0}
+.fact{border:none;background:#f3f5ff;border-radius:14px;padding:12px;font-size:20px;font-weight:900;text-align:left}
+.fact.sel{background:#ffe6dd}
+.fact b.hid{background:#c9cfe8;color:transparent;border-radius:6px}
+.arraybox{text-align:center;margin-top:10px}
+.dots{display:inline-grid;gap:4px;padding:10px;background:#f7f9ff;border-radius:14px}
+.dots i{width:14px;height:14px;border-radius:50%;background:var(--accent);display:block}
+/* games */
+.arena{position:relative;height:min(62vh,520px);background:linear-gradient(#bfe6ff,#eaf7ff);border-radius:20px;overflow:hidden;margin-top:10px}
+.bq{font-size:clamp(34px,8vw,56px);font-weight:900}
+.balloon{position:absolute;top:0;width:78px;height:96px;border:none;border-radius:50% 50% 50% 50%/42% 42% 58% 58%;font-size:26px;font-weight:900;color:#fff;text-shadow:0 2px 2px rgba(0,0,0,.25);box-shadow:inset -8px -10px 0 rgba(0,0,0,.12);will-change:transform}
+.balloon::after{content:"";position:absolute;left:50%;bottom:-26px;width:2px;height:26px;background:#8a8fa8}
+.c0{background:#ef4444}.c1{background:#3b82f6}.c2{background:#22c55e}.c3{background:#a855f7}.c4{background:#f59e0b}.c5{background:#ec4899}
+.balloon.pop{animation:pop .25s forwards}
+.balloon.wrong{background:#9ca3af;animation:shake .3s}
+@keyframes pop{to{opacity:0;scale:1.8}}
+.bossbox{background:linear-gradient(#2b1055,#7597de);border-radius:20px;padding:14px;color:#fff;position:relative;overflow:hidden}
+.bemoji{font-size:110px;line-height:1.1;transition:transform .2s}
+.bemoji.hit{animation:shake .3s;filter:brightness(1.6)}
+.bemoji.dead{transform:scale(0) rotate(360deg);transition:transform .9s}
+.bname{font-weight:900;font-size:20px}
+.hp{height:16px;background:rgba(255,255,255,.25);border-radius:99px;overflow:hidden;margin:8px auto;max-width:360px}
+.hp i{display:block;height:100%;background:linear-gradient(90deg,#f87171,#ef4444);transition:width .3s}
+.qtimer{height:10px;background:#e6e9f5;border-radius:99px;overflow:hidden;margin:12px auto 0;max-width:420px}
+.qtimer i{display:block;height:100%;background:#7c3aed}
+.flash-red{animation:redflash .4s}
+@keyframes redflash{50%{box-shadow:0 0 0 8px #ef4444}}
+.mgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;max-width:560px;margin:12px auto}
+.mcard{border:none;aspect-ratio:1/1.05;border-radius:16px;font-size:clamp(18px,4.5vw,28px);font-weight:900;background:linear-gradient(135deg,#7c3aed,#4f46e5);color:transparent;box-shadow:0 5px 0 rgba(0,0,0,.18);transition:transform .25s,background .25s}
+.mcard.up{background:#fff;color:var(--ink);border:3px solid #c7cdf0;transform:rotateY(180deg) rotateY(180deg)}
+.mcard.done{background:#dcfce7;color:#15803d;border:3px solid var(--good)}
+.float{position:fixed;pointer-events:none;font-weight:900;font-size:28px;color:#f97316;text-shadow:0 2px 0 #fff;animation:floatup 1s forwards;z-index:50;transform:translateX(-50%)}
+@keyframes floatup{to{opacity:0;margin-top:-70px}}
+/* trophies */
+.badges{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px}
+.badge{background:#f5f7ff;border-radius:18px;padding:12px;text-align:center}
+.badge .bi{font-size:40px}
+.badge b{display:block;font-size:15px}
+.badge small{font-size:12px;color:var(--muted);font-weight:800}
+.badge.locked .bi{filter:grayscale(1);opacity:.35}
+.badge.locked b{color:#9aa1bd}
+.mastery{border-collapse:separate;border-spacing:3px;margin:0 auto;font-weight:900;font-size:12px}
+.mastery td,.mastery th{width:30px;height:30px;text-align:center;border-radius:6px}
+.mastery th{color:var(--muted)}
+.m0{background:#eef0f7;color:#b5bbd2}.m1{background:#fdba74}.m2{background:#86efac}.m3{background:#16a34a;color:#fff}
+.legend{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;font-weight:800;font-size:13px;margin-top:10px}
+.legend span i{display:inline-block;width:14px;height:14px;border-radius:4px;vertical-align:-2px;margin-right:4px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:170px;padding:26px 10px 10px;background:#f7f9ff;border-radius:16px}
+.bars div{flex:1;background:linear-gradient(#a78bfa,#7c3aed);border-radius:8px 8px 3px 3px;position:relative;min-height:4px}
+.bars div.best{background:linear-gradient(#fde047,#f59e0b)}
+.bars div span{position:absolute;top:-20px;left:0;right:0;text-align:center;font-size:12px;font-weight:900}
+/* shop */
+.shopitem{background:#f5f7ff;border-radius:18px;padding:12px;text-align:center}
+.shopitem .si{font-size:44px}
+.swatch{height:50px;border-radius:12px;margin-bottom:6px}
+/* toasts */
+#toasts{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:60;display:flex;flex-direction:column;gap:8px;align-items:center;width:min(92vw,420px)}
+.toast{background:#1d2340;color:#fff;padding:12px 18px;border-radius:16px;font-weight:900;box-shadow:0 8px 20px rgba(0,0,0,.25);animation:tin .3s;text-align:center}
+.toast.big{background:linear-gradient(135deg,#f59e0b,#ef4444);font-size:18px}
+.toast.out{opacity:0;transition:opacity .4s}
+@keyframes tin{from{transform:translateY(-20px);opacity:0}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:55}
+.welcome{max-width:520px;margin:30px auto;text-align:center}
+.logo{font-size:64px}
+.nameinput{width:100%;font-size:24px;padding:14px;border-radius:16px;border:3px solid #dfe4fb;text-align:center;font-weight:900}
+.avpick{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:14px 0}
+.avpick button{font-size:34px;width:62px;height:62px;border-radius:50%;border:3px solid #e3e7f7;background:#fff}
+.avpick button.on{border-color:var(--accent);background:#fff1ec;transform:scale(1.1)}
+textarea{width:100%;min-height:80px;border-radius:12px;border:2px solid #dfe4fb;padding:10px;font-size:13px}
+.big-emoji{font-size:80px}
+@media (max-width:600px){.card{padding:14px;border-radius:20px}h1{font-size:26px}h2{font-size:22px}.pill{font-size:13px;padding:5px 9px}.mastery td,.mastery th{width:22px;height:22px;font-size:10px;border-radius:4px}.mastery{border-spacing:2px}.bemoji{font-size:70px}.bossbox{padding:10px}.q{margin:4px 0 2px}.pad button{height:56px}.arena{height:min(54vh,460px)}}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div id="toasts"></div>
+<div class="wrap">
+  <div id="topbar"></div>
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* ============ Helpers ============ */
+const $ = s => document.querySelector(s);
+const main = $('#main');
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+const shuffle = a => { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const range = (a, b) => Array.from({length: b - a + 1}, (_, i) => a + i);
+const dstr = d => d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+const todayStr = () => dstr(new Date());
+const yesterdayStr = () => { const d = new Date(); d.setDate(d.getDate() - 1); return dstr(d); };
+
+/* ============ Game data ============ */
+const DAILY_GOAL = 40;
+const FREE_AVATARS = ['🦊','🐼','🐸','🐯','🐨','🐵','🐶','🐱'];
+const SHOP_AVATARS = [
+  {e:'🦁',c:30},{e:'🐧',c:30},{e:'🦄',c:40},{e:'🦖',c:50},{e:'🐙',c:50},{e:'🦈',c:60},
+  {e:'🤖',c:80},{e:'👽',c:80},{e:'🦉',c:90},{e:'🐲',c:120},{e:'🧙',c:150},{e:'🦸',c:150},
+  {e:'🥷',c:200},{e:'🚀',c:220},{e:'🐉',c:300},{e:'👑',c:400}
+];
+const THEMES = {
+  sky:{n:'Sky Blue',c:0,v:['#4facfe','#00f2fe','#ff7a59']},
+  sunset:{n:'Sunset',c:50,v:['#fa709a','#fee140','#7c3aed']},
+  forest:{n:'Forest',c:50,v:['#11998e','#38ef7d','#f97316']},
+  candy:{n:'Candy',c:80,v:['#f093fb','#f5576c','#3b82f6']},
+  ocean:{n:'Deep Ocean',c:100,v:['#0f2027','#2c5364','#06b6d4']},
+  galaxy:{n:'Galaxy',c:150,v:['#30106b','#7b2ff7','#f59e0b']},
+  lava:{n:'Lava',c:200,v:['#f12711','#f5af19','#1e293b']},
+  gold:{n:'Golden Legend',c:400,v:['#b8860b','#ffd700','#7c2d12']}
+};
+const RANKS = [[1,'Number Rookie'],[3,'Fact Finder'],[5,'Times Tamer'],[8,'Product Pro'],[12,'Multiplication Master'],[16,'Math Legend'],[20,'Times Table Titan']];
+const TIPS = {
+  1:'Anything times 1 stays the same! 7 × 1 = 7.',
+  2:'Times 2 means DOUBLE it. 8 × 2 is 8 + 8 = 16.',
+  3:'Double it, then add one more group. 3 × 6 = 6 + 6 + 6 = 18.',
+  4:'Double, then double again! 4 × 7: 7 doubled is 14, 14 doubled is 28.',
+  5:'Answers end in 5 or 0. It is half of times 10: 5 × 8 is half of 80 = 40.',
+  6:'Times 5, then add one more group. 6 × 7 = 35 + 7 = 42.',
+  7:'Split it: times 5 plus times 2. 7 × 8 = 40 + 16 = 56.',
+  8:'Double, double, double! 8 × 6: 12, 24, 48.',
+  9:'Times 10, then take away one group. 9 × 6 = 60 − 6 = 54. The digits add up to 9!',
+  10:'Each digit moves one place to the left and a 0 fills the ones place. 10 × 7 = 70.',
+  11:'Up to 9, repeat the digit (11 × 4 = 44). After that, times 10 plus one more group: 11 × 12 = 120 + 12 = 132.',
+  12:'Times 10 plus times 2. 12 × 6 = 60 + 12 = 72.'
+};
+const BOSSES = [['👾','Glitch Gobbler'],['🦖','Rex the Wrecker'],['🐙','Professor Inkwell'],['🤖','Robo-Muncher 3000'],['👻','Boo-Bot'],['🦑','Squidzilla'],['👹','Grumbleclaw'],['🧟','Zed the Number Zombie'],['🦂','Scorpio Sting'],['🐲','Ember the Dragon'],['🐉','The Times Titan']];
+
+const BADGES = [
+  {id:'first',i:'👣',n:'First Steps',d:'Answer your first question',c:p=>p.totals.correct>=1},
+  {id:'c100',i:'💯',n:'Century',d:'100 correct answers',c:p=>p.totals.correct>=100},
+  {id:'c500',i:'🔥',n:'On Fire',d:'500 correct answers',c:p=>p.totals.correct>=500},
+  {id:'c1000',i:'🏆',n:'Fact Machine',d:'1,000 correct answers',c:p=>p.totals.correct>=1000},
+  {id:'c2500',i:'💎',n:'Diamond Brain',d:'2,500 correct answers',c:p=>p.totals.correct>=2500},
+  {id:'combo10',i:'⚡',n:'Combo Kid',d:'10 right in a row',c:p=>p.totals.bestCombo>=10},
+  {id:'combo25',i:'🌩️',n:'Unstoppable',d:'25 right in a row',c:p=>p.totals.bestCombo>=25},
+  {id:'combo50',i:'🌪️',n:'Hurricane',d:'50 right in a row',c:p=>p.totals.bestCombo>=50},
+  {id:'mm15',i:'⏱️',n:'Quick Thinker',d:'15 in a Math Minute*',c:p=>(p.bests.mmBadge||0)>=15},
+  {id:'mm25',i:'🚀',n:'Speed Racer',d:'25 in a Math Minute*',c:p=>(p.bests.mmBadge||0)>=25},
+  {id:'mm35',i:'🌟',n:'Lightning Brain',d:'35 in a Math Minute*',c:p=>(p.bests.mmBadge||0)>=35},
+  {id:'mm45',i:'👑',n:'Minute Royalty',d:'45 in a Math Minute*',c:p=>(p.bests.mmBadge||0)>=45},
+  {id:'star1',i:'⭐',n:'Rising Star',d:'3 stars on any table',c:p=>starCount(p)>=1},
+  {id:'star6',i:'✨',n:'Halfway Hero',d:'3 stars on 6 tables',c:p=>starCount(p)>=6},
+  {id:'starall',i:'🌈',n:'All-Star',d:'3 stars on all 12 tables',c:p=>starCount(p)>=12},
+  {id:'day3',i:'📅',n:'Habit Builder',d:'Play 3 days in a row',c:p=>p.days.best>=3},
+  {id:'day7',i:'🗓️',n:'Week Warrior',d:'Play 7 days in a row',c:p=>p.days.best>=7},
+  {id:'goal1',i:'🎯',n:'Goal Getter',d:'Finish a daily goal',c:p=>(p.totals.goals||0)>=1},
+  {id:'goal10',i:'🏹',n:'Sharpshooter',d:'Finish 10 daily goals',c:p=>(p.totals.goals||0)>=10},
+  {id:'boss3',i:'⚔️',n:'Monster Hunter',d:'Beat 3 bosses in one battle',c:p=>(p.bests.boss||0)>=3},
+  {id:'boss8',i:'🛡️',n:'Dragon Slayer',d:'Beat 8 bosses in one battle',c:p=>(p.bests.boss||0)>=8},
+  {id:'balloon20',i:'🎈',n:'Pop Star',d:'Pop 20 balloons in one game',c:p=>(p.bests.balloon||0)>=20},
+  {id:'balloon40',i:'🎆',n:'Balloon Boss',d:'Pop 40 balloons in one game',c:p=>(p.bests.balloon||0)>=40},
+  {id:'mem60',i:'🧠',n:'Memory Wizard',d:'Memory Match under 60 sec',c:p=>p.bests.memory && p.bests.memory<=60},
+  {id:'mem30',i:'🔮',n:'Mind Reader',d:'Memory Match under 30 sec',c:p=>p.bests.memory && p.bests.memory<=30},
+  {id:'lvl5',i:'🥉',n:'Level 5',d:'Reach level 5',c:p=>levelOf(p.xp)>=5},
+  {id:'lvl10',i:'🥈',n:'Level 10',d:'Reach level 10',c:p=>levelOf(p.xp)>=10},
+  {id:'lvl20',i:'🥇',n:'Level 20',d:'Reach level 20',c:p=>levelOf(p.xp)>=20},
+  {id:'shop',i:'🛍️',n:'Shopper',d:'Buy something in the shop',c:p=>p.owned.length>FREE_AVATARS.length||p.themes.length>1}
+];
+
+/* ============ Save data ============ */
+const STORE = 'timesTableQuest_v1';
+let db = loadDB();
+function loadDB(){
+  try { const d = JSON.parse(localStorage.getItem(STORE)); if (d && d.players) return d; } catch(e) {}
+  return {players:{}, current:null, muted:false};
+}
+function save(){ try { localStorage.setItem(STORE, JSON.stringify(db)); } catch(e) {} }
+function P(){ return db.players[db.current]; }
+function newPlayer(name, avatar){
+  return {name, avatar, xp:0, coins:0, owned:FREE_AVATARS.slice(), themes:['sky'], theme:'sky',
+    facts:{}, stars:{}, bests:{}, badges:[], mmHist:[],
+    days:{last:null,count:0,best:0}, today:{date:null,count:0,claimed:false},
+    totals:{answered:0,correct:0,bestCombo:0,goals:0}};
+}
+function fixPlayer(p){ // fills in anything missing (e.g. from older backups)
+  const base = newPlayer(p.name, p.avatar);
+  for (const k in base) if (p[k] === undefined) p[k] = base[k];
+  for (const k in base.totals) if (p.totals[k] === undefined) p.totals[k] = 0;
+  return p;
+}
+
+/* ============ Levels ============ */
+const levelStart = L => 50 * (L - 1) * L;   // XP needed to reach level L
+function levelOf(xp){ let L = 1; while (xp >= levelStart(L + 1)) L++; return L; }
+function rankOf(L){ let r = RANKS[0][1]; for (const [l, n] of RANKS) if (L >= l) r = n; return r; }
+const starCount = p => Object.values(p.stars).filter(s => s >= 3).length;
+
+/* ============ Sound ============ */
+let actx;
+function beep(f, d, type='sine', v=.15){
+  if (db.muted) return;
+  try {
+    actx = actx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = actx.createOscillator(), g = actx.createGain();
+    o.type = type; o.frequency.value = f;
+    g.gain.setValueAtTime(v, actx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001, actx.currentTime + d);
+    o.connect(g).connect(actx.destination); o.start(); o.stop(actx.currentTime + d);
+  } catch(e) {}
+}
+const sfx = {
+  good: () => { beep(660,.1,'triangle'); setTimeout(() => beep(880,.12,'triangle'), 70); },
+  bad: () => beep(170,.25,'square',.07),
+  pop: () => beep(950,.07,'triangle',.2),
+  level: () => [523,659,784,1047].forEach((f,i) => setTimeout(() => beep(f,.2,'triangle'), i*110)),
+  tick: () => beep(1200,.04,'sine',.06),
+  hit: () => { beep(300,.08,'sawtooth',.08); setTimeout(()=>beep(200,.1,'sawtooth',.06),60); },
+  coin: () => { beep(988,.08,'square',.06); setTimeout(()=>beep(1319,.15,'square',.06),80); }
+};
+
+/* ============ Effects ============ */
+const cv = $('#confetti'), cx = cv.getContext('2d');
+let parts = [], cfRaf = null;
+function confetti(n = 140){
+  cv.width = innerWidth; cv.height = innerHeight;
+  const cols = ['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899','#facc15'];
+  for (let i = 0; i < n; i++) parts.push({x:innerWidth/2 + rand(-120,120), y:innerHeight/3, vx:(Math.random()-.5)*14, vy:-Math.random()*13-4, c:cols[rand(0,6)], r:rand(6,11), life:rand(90,160), a:Math.random()*6});
+  if (!cfRaf) cfRaf = requestAnimationFrame(cfLoop);
+}
+function cfLoop(){
+  cx.clearRect(0,0,cv.width,cv.height);
+  for (const p of parts){ p.vy += .32; p.x += p.vx; p.y += p.vy; p.vx *= .99; p.life--; p.a += .2;
+    cx.save(); cx.translate(p.x,p.y); cx.rotate(p.a); cx.fillStyle = p.c; cx.fillRect(-p.r/2,-p.r/4,p.r,p.r/2); cx.restore(); }
+  parts = parts.filter(p => p.life > 0 && p.y < cv.height + 20);
+  if (parts.length) cfRaf = requestAnimationFrame(cfLoop); else { cfRaf = null; cx.clearRect(0,0,cv.width,cv.height); }
+}
+function toast(msg, big){
+  const t = document.createElement('div'); t.className = 'toast' + (big ? ' big' : ''); t.innerHTML = msg;
+  $('#toasts').appendChild(t);
+  setTimeout(() => t.classList.add('out'), 2800); setTimeout(() => t.remove(), 3300);
+}
+function floatText(msg, el){
+  const f = document.createElement('div'); f.className = 'float'; f.textContent = msg;
+  const r = el ? el.getBoundingClientRect() : {left:innerWidth/2,width:0,top:innerHeight/3};
+  f.style.left = (r.left + r.width/2) + 'px'; f.style.top = (r.top) + 'px';
+  document.body.appendChild(f); setTimeout(() => f.remove(), 1000);
+}
+
+/* ============ Progress & rewards ============ */
+function applyTheme(){
+  const t = THEMES[(P() && P().theme) || 'sky'] || THEMES.sky, s = document.documentElement.style;
+  s.setProperty('--bg1', t.v[0]); s.setProperty('--bg2', t.v[1]); s.setProperty('--accent', t.v[2]);
+}
+function touchDay(p){
+  const t = todayStr();
+  if (p.today.date !== t) p.today = {date:t, count:0, claimed:false};
+  if (p.days.last !== t){
+    p.days.count = (p.days.last === yesterdayStr()) ? p.days.count + 1 : 1;
+    p.days.last = t; p.days.best = Math.max(p.days.best, p.days.count);
+    if (p.days.count > 1) setTimeout(() => toast(`🔥 ${p.days.count} day streak! Keep it going!`, true), 400);
+  }
+}
+function gain(xp, coins){
+  const p = P(), before = levelOf(p.xp);
+  p.xp += xp; p.coins += coins;
+  const after = levelOf(p.xp);
+  if (after > before){
+    sfx.level(); confetti();
+    toast(`🎉 LEVEL UP! You are now level ${after}!`, true);
+    if (rankOf(after) !== rankOf(before)) setTimeout(() => toast(`🏅 New rank: ${rankOf(after)}`, true), 900);
+  }
+  renderTop();
+}
+function checkBadges(){
+  const p = P();
+  for (const b of BADGES){
+    if (!p.badges.includes(b.id) && b.c(p)){
+      p.badges.push(b.id); p.coins += 20;
+      setTimeout(() => { toast(`${b.i} Badge earned: <u>${b.n}</u>! +20 🪙`, true); sfx.coin(); }, 300);
+    }
+  }
+  save(); renderTop();
+}
+function recordFact(f, ok, ms){
+  const p = P(), k = f.a + 'x' + f.b;
+  const r = p.facts[k] || (p.facts[k] = {r:0, w:0, s:0, t:0});
+  touchDay(p); p.totals.answered++;
+  if (ok){
+    r.r++; r.s++;
+    if (ms != null){ const m = Math.min(ms, 10000); r.t = r.t ? Math.round(r.t*.7 + m*.3) : Math.round(m); }
+    p.totals.correct++; p.today.count++;
+    gain(10, 1);
+    if (p.today.count >= DAILY_GOAL && !p.today.claimed){
+      p.today.claimed = true; p.totals.goals = (p.totals.goals||0) + 1;
+      toast('🎯 Daily goal complete! +25 🪙', true); confetti(); gain(50, 25);
+    }
+  } else { r.w++; r.s = 0; }
+  checkBadges(); save();
+}
+function noteCombo(c, el){
+  const p = P();
+  if (c > p.totals.bestCombo) p.totals.bestCombo = c;
+  if (c > 0 && c % 10 === 0){ p.coins += 5; floatText(`🔥 ${c} combo! +5 🪙`, el); sfx.coin(); renderTop(); }
+}
+
+/* Weighted fact picker: facts you miss come up more often */
+let lastKey = '';
+function pickFact(tables, maxB = 12){
+  const p = P(), pool = [];
+  let total = 0;
+  for (const a of tables) for (let b = 1; b <= maxB; b++){
+    const f = p.facts[a + 'x' + b];
+    let w = 1;
+    if (f) w = 1 + f.w * 1.2 - Math.min(f.s, 5) * .15 + (f.t > 4000 ? .5 : 0);
+    w = Math.max(.25, Math.min(w, 6));
+    if (a + 'x' + b === lastKey) w = 0.01;
+    pool.push([a, b, w]); total += w;
+  }
+  let r = Math.random() * total, pick = pool[0];
+  for (const it of pool){ r -= it[2]; if (r <= 0){ pick = it; break; } }
+  const [a, b] = pick; lastKey = a + 'x' + b;
+  return Math.random() < .5 ? {a, b, x:a, y:b} : {a, b, x:b, y:a};
+}
+function distractors(f, n){
+  const ans = f.x * f.y, set = new Set([ans]);
+  const c = shuffle([f.x*(f.y+1), f.x*(f.y-1), (f.x+1)*f.y, (f.x-1)*f.y, ans+1, ans-1, ans+10, ans-10, f.x+f.y, ans+2]);
+  for (const v of c){ if (set.size > n) break; if (v > 0) set.add(v); }
+  while (set.size <= n) set.add(rand(1, 144));
+  return shuffle([...set]);
+}
+function factStatus(a, b){
+  const p = P(), fs = [p.facts[a+'x'+b], p.facts[b+'x'+a]].filter(Boolean);
+  if (!fs.length) return 0;
+  const s = Math.max(...fs.map(f => f.s)), ts = fs.map(f => f.t).filter(Boolean), t = ts.length ? Math.min(...ts) : 0;
+  if (s >= 4 && t && t < 3500) return 3;
+  if (s >= 2) return 2;
+  return 1;
+}
+
+/* ============ Number pad / keyboard ============ */
+let keyHandler = null;
+document.addEventListener('keydown', e => { if (keyHandler && !e.target.matches('input,textarea')) keyHandler(e); });
+const padHTML = () => `<div class="pad">${[7,8,9,4,5,6,1,2,3].map(n => `<button data-k="${n}">${n}</button>`).join('')}<button data-k="back">⌫</button><button data-k="0">0</button><button data-k="ok" class="ok">✓</button></div>`;
+function bindPad(onKey){
+  main.querySelectorAll('.pad button').forEach(b => b.addEventListener('pointerdown', e => { e.preventDefault(); onKey(b.dataset.k); }));
+  keyHandler = e => {
+    if (/^[0-9]$/.test(e.key)) onKey(e.key);
+    else if (e.key === 'Backspace'){ e.preventDefault(); onKey('back'); }
+    else if (e.key === 'Enter') onKey('ok');
+  };
+}
+/* Shared question asker. Auto-checks once enough digits are typed. */
+function Asker(pick, onDone){
+  const qEl = $('#q'), aEl = $('#ans');
+  let cur, typed = '', t0, locked = true;
+  const draw = () => { aEl.textContent = typed || '?'; aEl.classList.toggle('empty', !typed); };
+  function next(){
+    cur = pick(); cur.ans = cur.x * cur.y; typed = ''; t0 = performance.now();
+    qEl.textContent = `${cur.x} × ${cur.y}`; aEl.className = 'answer-box'; draw(); locked = false;
+  }
+  function key(k){
+    if (locked) return;
+    if (k === 'back'){ typed = typed.slice(0, -1); draw(); return; }
+    if (k === 'ok'){ if (typed) check(); return; }
+    if (typed.length >= 3) return;
+    typed += k; draw();
+    if (typed.length >= String(cur.ans).length) check();
+  }
+  function check(){
+    locked = true;
+    const ok = +typed === cur.ans, ms = performance.now() - t0;
+    aEl.classList.add(ok ? 'good' : 'bad');
+    (ok ? sfx.good : sfx.bad)();
+    recordFact(cur, ok, ms);
+    onDone(ok, cur, ms);
+  }
+  bindPad(key);
+  return {next, stop(){ locked = true; }, get cur(){ return cur; }};
+}
+
+/* ============ Router ============ */
+let cleanup = null, curScreen = 'home';
+const NAV = [['home','🏠','Home'],['practice','📚','Practice'],['mm','⚡','Math Minute'],['games','🎮','Games'],['trophies','🏆','Trophies'],['shop','🛍️','Shop']];
+function go(screen, ...args){
+  if (cleanup){ cleanup(); cleanup = null; }
+  keyHandler = null; window.scrollTo(0, 0);
+  if (!P()){ renderWelcome(); return; }
+  applyTheme(); renderTop();
+  const navKey = {table:'practice',quiz:'practice',mmplay:'mm',balloon:'games',boss:'games',memory:'games',players:'',results:''}[screen] ?? screen;
+  curScreen = screen;
+  $('#nav').innerHTML = NAV.map(([k,i,n]) => `<button class="${k===navKey?'on':''}" onclick="go('${k}')"><span>${i}</span>${n}</button>`).join('');
+  SCREENS[screen](...args);
+}
+function renderTop(){
+  const p = P(); if (!p) { $('#topbar').innerHTML = ''; return; }
+  const L = levelOf(p.xp), a = levelStart(L), b = levelStart(L + 1), pct = Math.round((p.xp - a) / (b - a) * 100);
+  $('#topbar').innerHTML = `<div class="top">
+    <button class="avatar" onclick="go('players')" title="Switch player">${p.avatar}</button>
+    <div class="who"><b>${esc(p.name)}</b> <span class="rank">Lv ${L} · ${rankOf(L)}</span>
+      <div class="xpbar" title="${p.xp - a} / ${b - a} XP"><i style="width:${pct}%"></i></div></div>
+    <span class="pill" title="Day streak">🔥 ${p.days.last === todayStr() || p.days.last === yesterdayStr() ? p.days.count : 0}</span>
+    <span class="pill" title="Coins">🪙 ${p.coins}</span>
+    <button class="iconbtn" onclick="db.muted=!db.muted;save();renderTop()" title="Sound">${db.muted ? '🔇' : '🔊'}</button>
+  </div>`;
+}
+
+/* ============ Screens ============ */
+const SCREENS = {};
+
+function renderWelcome(){
+  $('#topbar').innerHTML = ''; $('#nav').innerHTML = '';
+  const names = Object.keys(db.players);
+  let av = FREE_AVATARS[rand(0, FREE_AVATARS.length - 1)];
+  main.innerHTML = `<div class="card welcome">
+    <div class="logo">✖️🏆</div><h1>Times Table Quest</h1>
+    <p class="muted">Master your multiplication facts, earn coins, unlock rewards and beat your high scores!</p>
+    ${names.length ? `<h3>Who's playing?</h3><div class="row center">${names.map(n => `<button class="btn alt" data-n="${esc(n)}">${db.players[n].avatar} ${esc(n)}</button>`).join('')}</div><hr style="margin:20px 0;border:none;border-top:2px dashed #e3e7f7"><h3>New player</h3>` : ''}
+    <input class="nameinput" id="nm" maxlength="16" placeholder="Your first name or nickname">
+    <div class="avpick">${FREE_AVATARS.map(a => `<button class="${a===av?'on':''}" data-a="${a}">${a}</button>`).join('')}</div>
+    <button class="btn big" id="startbtn">Start my quest! 🚀</button>
+  </div>`;
+  main.querySelectorAll('[data-n]').forEach(b => b.onclick = () => { db.current = b.dataset.n; save(); go('home'); });
+  main.querySelectorAll('[data-a]').forEach(b => b.onclick = () => { av = b.dataset.a; main.querySelectorAll('[data-a]').forEach(x => x.classList.toggle('on', x === b)); });
+  const start = () => {
+    const n = $('#nm').value.trim().slice(0, 16);
+    if (!n){ $('#nm').focus(); toast('Type your name first!'); return; }
+    if (db.players[n]){ toast('That name is taken on this device. Pick it from the list or try another!'); return; }
+    db.players[n] = newPlayer(n, av); db.current = n; save();
+    go('home'); setTimeout(() => toast(`Welcome, ${esc(n)}! Your quest begins! 🗺️`, true), 200);
+  };
+  $('#startbtn').onclick = start;
+  $('#nm').addEventListener('keydown', e => { if (e.key === 'Enter') start(); });
+}
+
+SCREENS.home = () => {
+  const p = P(); touchDayDisplay(p);
+  const goal = Math.min(p.today.date === todayStr() ? p.today.count : 0, DAILY_GOAL);
+  let tricky = null, worst = 0;
+  for (const k in p.facts){ const f = p.facts[k], score = f.w * 2 - f.r * .5 - f.s; if (f.w > 0 && score > worst){ worst = score; tricky = k; } }
+  const mastered = range(1,12).reduce((s,a) => s + range(1,12).filter(b => factStatus(a,b) >= 2).length, 0);
+  const bestMM = Math.max(0, ...Object.entries(p.bests).filter(([k]) => k.startsWith('mm:')).map(([,v]) => v));
+  main.innerHTML = `
+  <div class="card">
+    <div class="row between"><h2>Hi ${esc(p.name)}! ${p.avatar}</h2><span class="muted" style="font-weight:800">${new Date().toLocaleDateString(undefined,{weekday:'long',month:'short',day:'numeric'})}</span></div>
+    <div style="font-weight:900;margin-bottom:6px">🎯 Daily goal: ${goal} / ${DAILY_GOAL} correct answers ${p.today.claimed && p.today.date===todayStr() ? '✅' : '(+25 🪙)'}</div>
+    <div class="progress"><i style="width:${goal/DAILY_GOAL*100}%"></i></div>
+    ${tricky ? `<p style="margin-bottom:0">🧩 Your trickiest fact right now: <b>${tricky.replace('x',' × ')} = ${tricky.split('x').reduce((m,n) => m * n, 1)}</b>. You've got this!</p>` : `<p style="margin-bottom:0">💡 Tip: start with <b>Practice</b> to learn a table, then try a <b>Math Minute</b>!</p>`}
+  </div>
+  <div class="grid g2">
+    <button class="tile t1" onclick="go('mm')"><span class="ic">⚡</span><b>Math Minute</b><small>How many can you get in 60 seconds? Best: ${bestMM}</small></button>
+    <button class="tile t2" onclick="go('boss')"><span class="ic">👾</span><b>Boss Battle</b><small>Defeat monsters with your math powers! Best: ${p.bests.boss||0} bosses</small></button>
+    <button class="tile t3" onclick="go('balloon')"><span class="ic">🎈</span><b>Balloon Pop</b><small>Pop the right answer before it floats away! Best: ${p.bests.balloon||0}</small></button>
+    <button class="tile t4" onclick="go('memory')"><span class="ic">🃏</span><b>Memory Match</b><small>Match facts to answers. Best: ${p.bests.memory ? p.bests.memory + 's' : '—'}</small></button>
+    <button class="tile t5" onclick="go('practice')"><span class="ic">📚</span><b>Practice Tables</b><small>Learn strategies and earn stars. ${starCount(p)}/12 tables at ⭐⭐⭐</small></button>
+  </div>
+  <div class="card" style="margin-top:14px"><div class="grid g4">
+    <div class="stat"><b>${p.totals.correct}</b><span>Correct answers</span></div>
+    <div class="stat"><b>${mastered}/144</b><span>Facts known</span></div>
+    <div class="stat"><b>${p.totals.bestCombo}</b><span>Best combo</span></div>
+    <div class="stat"><b>${p.badges.length}/${BADGES.length}</b><span>Badges</span></div>
+  </div></div>`;
+};
+function touchDayDisplay(p){ if (p.today.date !== todayStr()) p.today = {date:todayStr(), count:0, claimed:false}; }
+
+/* ---------- Practice ---------- */
+const starsHTML = n => `<span class="stars">${[1,2,3].map(i => i <= n ? '★' : '<span class="off">★</span>').join('')}</span>`;
+SCREENS.practice = () => {
+  const p = P();
+  main.innerHTML = `<div class="card"><h2>📚 Practice a Table</h2>
+    <p class="muted" style="margin-top:0">Pick a times table to learn. Get all 12 right to earn ⭐⭐. Get them all right <b>fast</b> (under 3 seconds each) for ⭐⭐⭐!</p>
+    <div class="grid g4">${range(1,12).map(t => {
+      const known = range(1,12).filter(b => factStatus(t,b) >= 2).length;
+      return `<button class="ttile" onclick="go('table',${t})"><b>×${t}</b>${starsHTML(p.stars[t]||0)}<div class="muted" style="font-size:12px;font-weight:800">${known}/12 known</div></button>`;
+    }).join('')}</div></div>`;
+};
+SCREENS.table = t => {
+  const p = P(); let covered = false;
+  main.innerHTML = `<div class="card">
+    <div class="row between"><button class="btn alt sm" onclick="go('practice')">← Tables</button>${starsHTML(p.stars[t]||0)}</div>
+    <h2 style="margin-top:10px">The ${t} Times Table</h2>
+    <div class="tip">💡 Strategy: ${TIPS[t]}</div>
+    <p class="muted" style="margin:6px 0">Tap a fact to see it as an <b>array</b> (rows and columns).</p>
+    <div class="facts">${range(1,12).map(b => `<button class="fact" data-b="${b}">${t} × ${b} = <b>${t*b}</b></button>`).join('')}</div>
+    <div class="row center"><button class="btn alt" id="cover">🙈 Cover answers</button><button class="btn green" onclick="go('quiz',${t})">Start Quiz →</button></div>
+    <div class="arraybox" id="arr"></div></div>`;
+  const facts = main.querySelectorAll('.fact');
+  facts.forEach(el => el.onclick = () => {
+    const b = +el.dataset.b; facts.forEach(x => x.classList.remove('sel')); el.classList.add('sel');
+    el.querySelector('b').classList.remove('hid');
+    $('#arr').innerHTML = `<div style="font-weight:900;margin-bottom:6px">${t} rows of ${b} = ${t*b}</div><div class="dots" style="grid-template-columns:repeat(${b},14px)">${'<i></i>'.repeat(t*b)}</div>`;
+  });
+  $('#cover').onclick = () => { covered = !covered; $('#cover').textContent = covered ? '👀 Show answers' : '🙈 Cover answers';
+    main.querySelectorAll('.fact b').forEach(x => x.classList.toggle('hid', covered)); };
+};
+SCREENS.quiz = t => {
+  const order = shuffle(range(1,12)); let i = 0, right = 0, combo = 0, totalMs = 0;
+  main.innerHTML = `<div class="card play">
+    <div class="row between"><button class="btn alt sm" onclick="go('table',${t})">← Back</button><span class="pill blue">Question <span id="qi">1</span>/12</span><span class="pill">✅ <span id="rc">0</span></span></div>
+    <div class="progress" style="margin-top:12px"><i id="pg"></i></div>
+    <div class="q" id="q"></div><div class="answer-box" id="ans"></div>
+    <div class="fb" id="fb"></div>${padHTML()}</div>`;
+  const asker = Asker(() => { const b = order[i]; return Math.random() < .5 ? {a:t,b,x:t,y:b} : {a:t,b,x:b,y:t}; }, (ok, f, ms) => {
+    const fb = $('#fb');
+    if (ok){ right++; combo++; totalMs += ms; noteCombo(combo, fb); fb.className = 'fb good'; fb.textContent = ['Nice!','Great!','Awesome!','Yes!','Super!'][rand(0,4)]; }
+    else { combo = 0; totalMs += 10000; fb.className = 'fb bad'; fb.textContent = `${f.x} × ${f.y} = ${f.ans}`; }
+    $('#rc').textContent = right; i++; $('#pg').style.width = (i/12*100) + '%';
+    setTimeout(() => { if (i >= 12) finish(); else { $('#qi').textContent = i + 1; fb.textContent = ''; asker.next(); } }, ok ? 450 : 1500);
+  });
+  asker.next();
+  function finish(){
+    const p = P(), avg = totalMs / 12;
+    const stars = right === 12 && avg <= 3000 ? 3 : right === 12 ? 2 : right >= 9 ? 1 : 0;
+    const prev = p.stars[t] || 0, gained = Math.max(0, stars - prev);
+    if (stars > prev) p.stars[t] = stars;
+    const coins = gained * 10;
+    if (coins) gain(20, coins);
+    checkBadges(); save();
+    if (stars >= 2) confetti();
+    main.innerHTML = `<div class="card play">
+      <div class="big-emoji">${['😅','🙂','😃','🤩'][stars]}</div>
+      <h2>${right} / 12 correct!</h2>
+      <div style="font-size:44px">${starsHTML(stars)}</div>
+      <p>Average time: <b>${(avg/1000).toFixed(1)} sec</b> per question</p>
+      ${gained ? `<p style="font-weight:900;color:#f59e0b">New stars! +${coins} 🪙</p>` : ''}
+      <p class="muted">${stars < 2 ? 'Get all 12 right for 2 stars!' : stars < 3 ? 'Get all 12 right in under 3 seconds each for 3 stars!' : 'Perfect! You are a ×' + t + ' champion!'}</p>
+      <div class="row center"><button class="btn" onclick="go('quiz',${t})">Try again 🔁</button><button class="btn alt" onclick="go('practice')">Pick another table</button></div></div>`;
+  }
+};
+
+/* ---------- Math Minute ---------- */
+let mmSel = new Set(range(1,10));
+const mmKey = sel => 'mm:' + [...sel].sort((a,b) => a-b).join(',');
+function mmLabel(sel){
+  const s = [...sel].sort((a,b) => a-b);
+  const consecutive = s.every((v,i) => i === 0 || v === s[i-1] + 1);
+  return s.length > 2 && consecutive ? `×${s[0]} to ×${s[s.length-1]}` : s.map(x => '×' + x).join(', ');
+}
+SCREENS.mm = () => {
+  const p = P();
+  const draw = () => {
+    const best = p.bests[mmKey(mmSel)] || 0;
+    main.innerHTML = `<div class="card play">
+      <h2>⚡ Math Minute</h2>
+      <p class="muted" style="margin-top:0">Answer as many as you can in <b>60 seconds</b>. Beat your high score!</p>
+      <div class="row center" style="margin-bottom:10px">
+        <button class="btn sm alt" data-pre="g4">Grade 4 (×1 to ×10)</button>
+        <button class="btn sm alt" data-pre="all">All (×1 to ×12)</button>
+        <button class="btn sm alt" data-pre="2510">×2, ×5, ×10</button>
+      </div>
+      <div class="chips">${range(1,12).map(n => `<button class="chip ${mmSel.has(n)?'on':''}" data-n="${n}">${n}</button>`).join('')}</div>
+      <p style="font-weight:900;margin:16px 0 4px">Tables: ${mmSel.size ? mmLabel(mmSel) : 'pick at least one!'}</p>
+      <p style="margin-top:0">🏆 Your high score for these tables: <b>${best}</b></p>
+      <button class="btn big" id="go" ${mmSel.size ? '' : 'disabled'}>START! ⏱️</button>
+      <p class="muted" style="font-size:13px">*Math Minute badges count when you pick 3 or more tables.</p>
+    </div>`;
+    main.querySelectorAll('.chip').forEach(c => c.onclick = () => { const n = +c.dataset.n; mmSel.has(n) ? mmSel.delete(n) : mmSel.add(n); draw(); });
+    main.querySelectorAll('[data-pre]').forEach(b => b.onclick = () => { mmSel = new Set(b.dataset.pre === 'g4' ? range(1,10) : b.dataset.pre === 'all' ? range(1,12) : [2,5,10]); draw(); });
+    $('#go').onclick = () => go('mmplay');
+  };
+  draw();
+};
+SCREENS.mmplay = () => {
+  const tables = [...mmSel]; let score = 0, wrong = 0, combo = 0, missed = [], endAt = 0, iv = null, done = false;
+  main.innerHTML = `<div class="card play"><div class="countdown" id="cd">3</div></div>`;
+  let n = 3; sfx.tick();
+  const cdIv = setInterval(() => {
+    n--; if (n > 0){ $('#cd').textContent = n; sfx.tick(); }
+    else if (n === 0){ $('#cd').textContent = 'GO!'; beep(1500,.2,'triangle'); }
+    else { clearInterval(cdIv); start(); }
+  }, 800);
+  cleanup = () => { clearInterval(cdIv); clearInterval(iv); done = true; };
+  let asker;
+  function start(){
+    main.innerHTML = `<div class="card play">
+      <div class="row between"><button class="btn alt sm" onclick="go('mm')">✕ Quit</button><span class="timer" id="tm">60</span><span class="pill">✅ <span id="sc">0</span></span></div>
+      <div class="progress" style="margin-top:8px"><i id="tbar" style="width:100%;background:linear-gradient(90deg,#f59e0b,#ef4444);transition:width .1s linear"></i></div>
+      <div class="combo" id="cb" style="min-height:24px;margin-top:6px"></div>
+      <div class="q" id="q"></div><div class="answer-box" id="ans"></div>
+      <div class="fb" id="fb"></div>${padHTML()}</div>`;
+    asker = Asker(() => pickFact(tables), (ok, f) => {
+      if (done) return;
+      const fb = $('#fb');
+      if (ok){ score++; combo++; noteCombo(combo, $('#sc')); $('#sc').textContent = score; fb.textContent = ''; }
+      else { wrong++; combo = 0; missed.push(`${f.x} × ${f.y} = ${f.ans}`); fb.className = 'fb bad'; fb.textContent = `${f.x} × ${f.y} = ${f.ans}`; }
+      $('#cb').textContent = combo >= 3 ? `🔥 ${combo} in a row!` : '';
+      setTimeout(() => { if (!done){ fb.textContent = ''; asker.next(); } }, ok ? 120 : 900);
+    });
+    asker.next();
+    endAt = performance.now() + 60000;
+    let lastSec = 60;
+    iv = setInterval(() => {
+      const left = Math.max(0, endAt - performance.now()), sec = Math.ceil(left / 1000);
+      $('#tm').textContent = sec; $('#tm').classList.toggle('low', sec <= 10);
+      $('#tbar').style.width = (left / 600) + '%';
+      if (sec !== lastSec && sec <= 5 && sec > 0) sfx.tick();
+      lastSec = sec;
+      if (left <= 0){ clearInterval(iv); done = true; asker.stop(); keyHandler = null; finish(); }
+    }, 100);
+  }
+  function finish(){
+    const p = P(), key = mmKey(mmSel), prev = p.bests[key] || 0, isBest = score > prev;
+    if (isBest) p.bests[key] = score;
+    if (tables.length >= 3) p.bests.mmBadge = Math.max(p.bests.mmBadge || 0, score);
+    p.mmHist.push({d:Date.now(), k:key, s:score}); if (p.mmHist.length > 100) p.mmHist.shift();
+    gain(20, isBest && prev > 0 ? 15 : 0);
+    checkBadges(); save();
+    if (isBest && score > 0){ confetti(200); sfx.level(); }
+    const hist = p.mmHist.filter(h => h.k === key).slice(-12), mx = Math.max(...hist.map(h => h.s), 1);
+    const acc = score + wrong ? Math.round(score / (score + wrong) * 100) : 0;
+    main.innerHTML = `<div class="card play">
+      <div class="big-emoji">${isBest && score > 0 ? '🏆' : score >= prev * .8 ? '💪' : '⏱️'}</div>
+      ${isBest && score > 0 ? '<h2 style="color:#f59e0b">NEW HIGH SCORE!</h2>' : ''}
+      <h1 style="font-size:56px;margin:0">${score}</h1><p style="margin-top:0;font-weight:900">correct in one minute</p>
+      <div class="grid g4" style="max-width:520px;margin:0 auto 14px">
+        <div class="stat"><b>${prev && !isBest ? prev : score}</b><span>High score</span></div>
+        <div class="stat"><b>${acc}%</b><span>Accuracy</span></div>
+        <div class="stat"><b>+${score + 20 + (isBest && prev > 0 ? 15 : 0)}</b><span>Coins & XP bonus</span></div>
+      </div>
+      <h3>📈 Your last ${hist.length} tries (${mmLabel(mmSel)})</h3>
+      <div class="bars">${hist.map((h,i) => `<div class="${h.s === Math.max(...hist.map(x=>x.s)) ? 'best' : ''}" style="height:${h.s/mx*100}%"><span>${h.s}</span></div>`).join('')}</div>
+      ${missed.length ? `<h3 style="margin-top:16px">Facts to practise</h3><p>${[...new Set(missed)].map(m => `<span class="pill red" style="display:inline-block;margin:3px">${m}</span>`).join('')}</p>` : '<p style="font-weight:900;color:var(--good)">No mistakes! 🎯</p>'}
+      <div class="row center" style="margin-top:10px"><button class="btn big" onclick="go('mmplay')">Go again! ⚡</button><button class="btn alt" onclick="go('mm')">Change tables</button></div></div>`;
+  }
+};
+
+/* ---------- Games menu ---------- */
+SCREENS.games = () => {
+  const p = P();
+  main.innerHTML = `<div class="card"><h2>🎮 Games</h2><p class="muted" style="margin-top:0">Every correct answer earns XP and coins. Beat your best scores!</p>
+    <div class="grid g2">
+      <button class="tile t2" onclick="go('boss')"><span class="ic">👾</span><b>Boss Battle</b><small>Answer fast to deal damage. Quick answers are CRITICAL HITS! Monsters get tougher as you go.<br>🏆 Best: ${p.bests.boss||0} bosses</small></button>
+      <button class="tile t3" onclick="go('balloon')"><span class="ic">🎈</span><b>Balloon Pop</b><small>Tap the balloon with the right answer before it floats away. 3 lives!<br>🏆 Best: ${p.bests.balloon||0} pops</small></button>
+      <button class="tile t4" onclick="go('memory')"><span class="ic">🃏</span><b>Memory Match</b><small>Flip cards to match each fact with its answer. Be quick!<br>🏆 Best: ${p.bests.memory ? p.bests.memory + ' sec' : 'not played yet'}</small></button>
+      <button class="tile t1" onclick="go('mm')"><span class="ic">⚡</span><b>Math Minute</b><small>60 seconds. How many can you get?</small></button>
+    </div></div>`;
+};
+function gameOver({emoji, title, score, unit, bestKey, lowerBetter, again, extra=''}){
+  const p = P(), prev = p.bests[bestKey];
+  const isBest = score > 0 && (prev == null || (lowerBetter ? score < prev : score > prev));
+  if (isBest) p.bests[bestKey] = score;
+  p.totals.games = (p.totals.games || 0) + 1;
+  gain(15, isBest && prev != null ? 15 : 3);
+  checkBadges(); save();
+  if (isBest){ confetti(200); sfx.level(); }
+  main.innerHTML = `<div class="card play">
+    <div class="big-emoji">${isBest ? '🏆' : emoji}</div>
+    ${isBest ? '<h2 style="color:#f59e0b">NEW BEST!</h2>' : `<h2>${title}</h2>`}
+    <h1 style="font-size:54px;margin:0">${score} <span style="font-size:24px">${unit}</span></h1>
+    <p>🏆 Best: <b>${p.bests[bestKey] ?? '—'} ${unit}</b></p>${extra}
+    <div class="row center"><button class="btn big" onclick="go('${again}')">Play again 🔁</button><button class="btn alt" onclick="go('games')">All games</button></div></div>`;
+}
+
+/* ---------- Balloon Pop ---------- */
+SCREENS.balloon = () => {
+  main.innerHTML = `<div class="card play">
+    <div class="row between"><button class="btn alt sm" onclick="go('games')">← Games</button><span class="pill red" id="hearts">❤️❤️❤️</span><span class="pill">🎈 <span id="sc">0</span></span></div>
+    <div class="bq" id="bq" style="margin-top:8px"></div>
+    <div class="combo" id="cb" style="min-height:22px"></div>
+    <div class="arena" id="arena"></div></div>`;
+  const arena = $('#arena');
+  let hearts = 3, score = 0, combo = 0, balloons = [], cur, raf, over = false, waiting = false, speed = 50, t0 = 0, last = performance.now();
+  const tables = () => score < 8 ? [1,2,3,4,5,10] : score < 18 ? range(1,10) : range(1,12);
+  function round(){
+    arena.querySelectorAll('.balloon').forEach(b => b.remove());
+    cur = pickFact(tables()); cur.ans = cur.x * cur.y;
+    $('#bq').textContent = `${cur.x} × ${cur.y} = ?`;
+    const H = arena.clientHeight; speed = Math.min(45 + score * 3.5, 200);
+    balloons = distractors(cur, 3).map((v, i) => {
+      const el = document.createElement('button'); el.className = 'balloon c' + rand(0,5); el.textContent = v;
+      el.style.left = `calc(${(i + .5) * 25}% - 39px)`;
+      const b = {el, v, y: H + rand(10, 140), sway: Math.random() * 6, popped: false};
+      el.style.transform = `translateY(${b.y}px)`;
+      el.addEventListener('pointerdown', e => { e.preventDefault(); hit(b); });
+      arena.appendChild(el); return b;
+    });
+    t0 = performance.now(); waiting = false;
+  }
+  function hit(b){
+    if (over || waiting || b.popped) return;
+    b.popped = true;
+    if (b.v === cur.ans){
+      waiting = true; b.el.classList.add('pop'); sfx.pop();
+      recordFact(cur, true, performance.now() - t0);
+      score++; combo++; noteCombo(combo, b.el); $('#sc').textContent = score;
+      $('#cb').textContent = combo >= 3 ? `🔥 ${combo} in a row!` : '';
+      setTimeout(() => { if (!over) round(); }, 300);
+    } else {
+      b.el.classList.add('wrong'); recordFact(cur, false, null); combo = 0; $('#cb').textContent = '';
+      sfx.bad(); loseHeart(`${cur.x} × ${cur.y} = ${cur.ans}`);
+    }
+  }
+  function loseHeart(msg){
+    hearts--; $('#hearts').textContent = '❤️'.repeat(Math.max(hearts,0)) + '🖤'.repeat(3 - Math.max(hearts,0));
+    arena.classList.remove('flash-red'); void arena.offsetWidth; arena.classList.add('flash-red');
+    if (hearts <= 0){ over = true; cancelAnimationFrame(raf); setTimeout(() => gameOver({emoji:'🎈', title:'Game over!', score, unit:'pops', bestKey:'balloon', again:'balloon', extra: `<p class="muted">Last one: ${msg}</p>`}), 700); return; }
+    waiting = true; $('#bq').textContent = msg; setTimeout(() => { if (!over) round(); }, 1300);
+  }
+  function loop(now){
+    const dt = Math.min((now - last) / 1000, .05); last = now;
+    if (!waiting){
+      for (const b of balloons){
+        if (b.popped) continue;
+        b.y -= speed * dt; b.sway += dt * 2;
+        b.el.style.transform = `translate(${Math.sin(b.sway) * 8}px, ${b.y}px)`;
+      }
+      const good = balloons.find(b => b.v === cur.ans);
+      if (good && good.y < -110){ recordFact(cur, false, null); combo = 0; sfx.bad(); loseHeart(`It got away! ${cur.x} × ${cur.y} = ${cur.ans}`); }
+    }
+    if (!over) raf = requestAnimationFrame(loop);
+  }
+  round(); raf = requestAnimationFrame(loop);
+  cleanup = () => { over = true; cancelAnimationFrame(raf); };
+};
+
+/* ---------- Boss Battle ---------- */
+SCREENS.boss = () => {
+  let lvl = 0, hearts = 5, hp, maxHp, combo = 0, qIv = null, qStart, qLimit, defeated = 0, over = false;
+  const tablesFor = l => l < 1 ? [2,5,10] : l < 2 ? [1,2,3,4,5,10] : l < 4 ? range(1,10) : range(1,12);
+  main.innerHTML = `<div class="card play">
+    <div class="row between"><button class="btn alt sm" onclick="go('games')">← Games</button><span class="pill red" id="hearts"></span><span class="pill">⚔️ <span id="def">0</span></span></div>
+    <div class="bossbox" style="margin-top:10px"><div class="bname" id="bname"></div><div class="hp"><i id="hpbar"></i></div><div class="bemoji" id="bemoji"></div></div>
+    <div class="qtimer"><i id="qt"></i></div>
+    <div class="q" id="q"></div><div class="answer-box" id="ans"></div>
+    <div class="fb" id="fb"></div>${padHTML()}</div>`;
+  const drawHearts = () => $('#hearts').textContent = '❤️'.repeat(hearts) + '🖤'.repeat(5 - hearts);
+  const drawHp = () => $('#hpbar').style.width = Math.max(0, hp / maxHp * 100) + '%';
+  function spawn(){
+    const [e, n] = BOSSES[lvl % BOSSES.length];
+    maxHp = hp = 4 + lvl * 2; qLimit = Math.max(4500, 10000 - lvl * 600);
+    $('#bname').textContent = `Level ${lvl + 1}: ${n}`; const be = $('#bemoji'); be.className = 'bemoji'; be.textContent = e;
+    drawHp(); drawHearts();
+  }
+  function startTimer(){
+    clearInterval(qIv); qStart = performance.now();
+    qIv = setInterval(() => {
+      const left = 1 - (performance.now() - qStart) / qLimit;
+      $('#qt').style.width = Math.max(0, left * 100) + '%';
+      if (left <= 0){ clearInterval(qIv); asker.stop(); const f = asker.cur; recordFact(f, false, null); bossHits(`Too slow! ${f.x} × ${f.y} = ${f.ans}`); }
+    }, 50);
+  }
+  function bossHits(msg){
+    combo = 0; hearts--; drawHearts(); sfx.bad();
+    const fb = $('#fb'); fb.className = 'fb bad'; fb.textContent = msg;
+    main.querySelector('.card').classList.remove('flash-red'); void main.offsetWidth; main.querySelector('.card').classList.add('flash-red');
+    if (hearts <= 0){ over = true; setTimeout(() => gameOver({emoji:'💀', title:'Defeated!', score:defeated, unit: defeated === 1 ? 'boss' : 'bosses', bestKey:'boss', again:'boss'}), 1200); return; }
+    setTimeout(() => { if (!over){ fb.textContent = ''; asker.next(); startTimer(); } }, 1400);
+  }
+  const asker = Asker(() => pickFact(tablesFor(lvl)), (ok, f, ms) => {
+    clearInterval(qIv);
+    if (!ok){ bossHits(`Ouch! ${f.x} × ${f.y} = ${f.ans}`); return; }
+    const crit = ms < 3000, dmg = crit ? 2 : 1;
+    hp -= dmg; combo++; noteCombo(combo, $('#bemoji')); drawHp(); sfx.hit();
+    const be = $('#bemoji'); be.classList.remove('hit'); void be.offsetWidth; be.classList.add('hit');
+    floatText(crit ? `CRITICAL! -${dmg}` : `-${dmg}`, be);
+    const fb = $('#fb'); fb.className = 'fb good'; fb.textContent = crit ? '⚡ Critical hit!' : '💥 Hit!';
+    if (hp <= 0){
+      defeated++; $('#def').textContent = defeated; be.classList.add('dead');
+      fb.textContent = `🎉 ${BOSSES[lvl % BOSSES.length][1]} defeated! +5 🪙`; confetti(80); sfx.level();
+      gain(25, 5); if (hearts < 5){ hearts++; setTimeout(() => toast('❤️ +1 heart!'), 300); }
+      lvl++;
+      setTimeout(() => { if (!over){ fb.textContent = ''; spawn(); asker.next(); startTimer(); } }, 1600);
+      return;
+    }
+    setTimeout(() => { if (!over){ fb.textContent = ''; asker.next(); startTimer(); } }, 350);
+  });
+  spawn(); asker.next(); startTimer();
+  cleanup = () => { over = true; clearInterval(qIv); };
+};
+
+/* ---------- Memory Match ---------- */
+SCREENS.memory = () => {
+  const facts = [], prods = new Set();
+  let guard = 0;
+  while (facts.length < 6 && guard++ < 500){ const f = pickFact(range(2,12)); const a = f.x * f.y; if (!prods.has(a)){ prods.add(a); f.ans = a; facts.push(f); } }
+  const cards = shuffle(facts.flatMap((f, i) => [{pair:i, label:`${f.x}×${f.y}`}, {pair:i, label:String(f.ans)}]));
+  let first = null, lock = false, matched = 0, moves = 0, start = null, iv = null;
+  main.innerHTML = `<div class="card play">
+    <div class="row between"><button class="btn alt sm" onclick="go('games')">← Games</button><span class="pill blue">⏱️ <span id="tm">0</span>s</span><span class="pill">🔄 <span id="mv">0</span> tries</span></div>
+    <p class="muted" style="margin-bottom:0">Match each fact with its answer!</p>
+    <div class="mgrid">${cards.map((c, i) => `<button class="mcard" data-i="${i}">${c.label}</button>`).join('')}</div></div>`;
+  const els = main.querySelectorAll('.mcard');
+  els.forEach(el => el.onclick = () => {
+    const i = +el.dataset.i, c = cards[i];
+    if (lock || c.up || c.done) return;
+    if (!start){ start = performance.now(); iv = setInterval(() => $('#tm').textContent = Math.floor((performance.now() - start) / 1000), 250); }
+    c.up = true; el.classList.add('up'); sfx.tick();
+    if (!first){ first = {c, el}; return; }
+    moves++; $('#mv').textContent = moves;
+    if (first.c.pair === c.pair){
+      c.done = first.c.done = true; el.classList.add('done'); first.el.classList.add('done');
+      recordFact(facts[c.pair], true, null); first = null; matched++;
+      if (matched === 6){
+        clearInterval(iv); const secs = Math.round((performance.now() - start) / 1000);
+        setTimeout(() => gameOver({emoji:'🧠', title:'All matched!', score:secs, unit:'sec', bestKey:'memory', lowerBetter:true, again:'memory', extra:`<p class="muted">${moves} tries</p>`}), 600);
+      }
+    } else {
+      lock = true; const f = first; first = null;
+      setTimeout(() => { c.up = f.c.up = false; el.classList.remove('up'); f.el.classList.remove('up'); lock = false; }, 850);
+    }
+  });
+  cleanup = () => clearInterval(iv);
+};
+
+/* ---------- Trophies ---------- */
+SCREENS.trophies = () => {
+  const p = P();
+  const hist = p.mmHist.slice(-15), mx = Math.max(...hist.map(h => h.s), 1);
+  main.innerHTML = `
+  <div class="card"><h2>🏅 Badges (${p.badges.length}/${BADGES.length})</h2>
+    <div class="badges">${BADGES.map(b => { const has = p.badges.includes(b.id); return `<div class="badge ${has ? '' : 'locked'}"><div class="bi">${b.i}</div><b>${b.n}</b><small>${b.d}</small></div>`; }).join('')}</div>
+    <p class="muted" style="font-size:13px">*Math Minute badges count when you pick 3 or more tables.</p></div>
+  <div class="card"><h2>🗺️ My Multiplication Map</h2>
+    <p class="muted" style="margin-top:0">Every square is a fact. Fill the whole map with green!</p>
+    <div style="overflow-x:auto"><table class="mastery"><tr><th>×</th>${range(1,12).map(n => `<th>${n}</th>`).join('')}</tr>
+      ${range(1,12).map(a => `<tr><th>${a}</th>${range(1,12).map(b => `<td class="m${factStatus(a,b)}" title="${a} × ${b} = ${a*b}">${a*b}</td>`).join('')}</tr>`).join('')}
+    </table></div>
+    <div class="legend"><span><i class="m0"></i>Not tried</span><span><i class="m1"></i>Learning</span><span><i class="m2"></i>Got it</span><span><i class="m3"></i>Mastered (fast!)</span></div></div>
+  <div class="card"><h2>⚡ Math Minute History</h2>
+    ${hist.length ? `<div class="bars">${hist.map(h => `<div title="${mmLabel(new Set(h.k.slice(3).split(',').map(Number)))}" style="height:${h.s/mx*100}%"><span>${h.s}</span></div>`).join('')}</div><p class="muted" style="font-size:13px">Your last ${hist.length} Math Minutes (oldest to newest).</p>` : '<p class="muted">Play a Math Minute to see your progress here!</p>'}
+    <h3>High scores</h3>
+    <div class="grid g4">${Object.entries(p.bests).filter(([k]) => k.startsWith('mm:')).sort((a,b) => b[1]-a[1]).slice(0,8).map(([k,v]) => `<div class="stat"><b>${v}</b><span>${mmLabel(new Set(k.slice(3).split(',').map(Number)))}</span></div>`).join('') || '<p class="muted">None yet!</p>'}</div></div>
+  <div class="card"><h2>📊 My Stats</h2><div class="grid g4">
+    <div class="stat"><b>${levelOf(p.xp)}</b><span>Level</span></div>
+    <div class="stat"><b>${p.xp}</b><span>Total XP</span></div>
+    <div class="stat"><b>${p.totals.correct}</b><span>Correct</span></div>
+    <div class="stat"><b>${p.totals.answered ? Math.round(p.totals.correct / p.totals.answered * 100) : 0}%</b><span>Accuracy</span></div>
+    <div class="stat"><b>${p.days.best}</b><span>Best day streak</span></div>
+    <div class="stat"><b>${p.totals.goals||0}</b><span>Daily goals</span></div>
+  </div></div>`;
+};
+
+/* ---------- Shop ---------- */
+SCREENS.shop = () => {
+  const p = P();
+  main.innerHTML = `
+  <div class="card"><div class="row between"><h2>🛍️ Shop</h2><span class="pill" style="font-size:20px">🪙 ${p.coins}</span></div>
+    <p class="muted" style="margin-top:0">Earn coins by answering questions, beating high scores, earning stars and badges.</p>
+    <h3>Avatars</h3>
+    <div class="grid g4">${FREE_AVATARS.map(e => ({e, c:0})).concat(SHOP_AVATARS).map(({e, c}) => {
+      const own = p.owned.includes(e), on = p.avatar === e;
+      return `<div class="shopitem"><div class="si">${e}</div>${on ? '<button class="btn sm green" disabled>Wearing</button>' : own ? `<button class="btn sm alt" data-wear="${e}">Use</button>` : `<button class="btn sm" data-buy="${e}" data-c="${c}" ${p.coins < c ? 'disabled' : ''}>🪙 ${c}</button>`}</div>`;
+    }).join('')}</div></div>
+  <div class="card"><h3>Themes</h3>
+    <div class="grid g4">${Object.entries(THEMES).map(([k, t]) => {
+      const own = p.themes.includes(k), on = p.theme === k;
+      return `<div class="shopitem"><div class="swatch" style="background:linear-gradient(135deg,${t.v[0]},${t.v[1]})"></div><b>${t.n}</b><br>${on ? '<button class="btn sm green" disabled>On</button>' : own ? `<button class="btn sm alt" data-theme="${k}">Use</button>` : `<button class="btn sm" data-bt="${k}" ${p.coins < t.c ? 'disabled' : ''}>🪙 ${t.c}</button>`}</div>`;
+    }).join('')}</div></div>`;
+  main.querySelectorAll('[data-buy]').forEach(b => b.onclick = () => { const c = +b.dataset.c; if (p.coins < c) return; p.coins -= c; p.owned.push(b.dataset.buy); p.avatar = b.dataset.buy; sfx.coin(); confetti(60); toast(`New avatar unlocked! ${b.dataset.buy}`, true); checkBadges(); go('shop'); });
+  main.querySelectorAll('[data-wear]').forEach(b => b.onclick = () => { p.avatar = b.dataset.wear; save(); go('shop'); });
+  main.querySelectorAll('[data-bt]').forEach(b => b.onclick = () => { const k = b.dataset.bt, c = THEMES[k].c; if (p.coins < c) return; p.coins -= c; p.themes.push(k); p.theme = k; sfx.coin(); confetti(60); toast(`New theme unlocked: ${THEMES[k].n}!`, true); checkBadges(); go('shop'); });
+  main.querySelectorAll('[data-theme]').forEach(b => b.onclick = () => { p.theme = b.dataset.theme; save(); go('shop'); });
+};
+
+/* ---------- Players & backup ---------- */
+SCREENS.players = () => {
+  const p = P(), names = Object.keys(db.players);
+  main.innerHTML = `
+  <div class="card"><h2>👥 Players on this device</h2>
+    <div class="grid g4">${names.map(n => { const q = db.players[n]; return `<div class="stat"><div style="font-size:40px">${q.avatar}</div><b style="font-size:18px">${esc(n)}</b><span>Level ${levelOf(q.xp)}</span><br>${n === db.current ? '<span class="pill blue">Playing now</span>' : `<button class="btn sm" data-sw="${esc(n)}">Switch</button>`}</div>`; }).join('')}</div>
+    <div class="row" style="margin-top:14px"><button class="btn green" id="newp">➕ New player</button><button class="btn alt" id="delp">🗑️ Delete ${esc(p.name)}</button></div></div>
+  <div class="card"><h2>💾 Backup my progress</h2>
+    <p class="muted" style="margin-top:0">Progress saves automatically in this browser. To move to another computer or keep a backup, copy this code and paste it somewhere safe (like a Google Doc or an email to yourself).</p>
+    <textarea id="exp" readonly>${btoa(unescape(encodeURIComponent(JSON.stringify(p))))}</textarea>
+    <button class="btn sm" id="copy">📋 Copy code</button>
+    <h3 style="margin-top:20px">Load a backup</h3>
+    <textarea id="imp" placeholder="Paste a backup code here"></textarea>
+    <button class="btn sm purple" id="load">⬆️ Load backup</button></div>`;
+  main.querySelectorAll('[data-sw]').forEach(b => b.onclick = () => { db.current = b.dataset.sw; save(); go('home'); });
+  $('#newp').onclick = () => { db.current = null; save(); renderWelcome(); };
+  $('#delp').onclick = () => {
+    if (!confirm(`Delete ${p.name} and ALL their progress? This cannot be undone.`)) return;
+    delete db.players[db.current]; db.current = Object.keys(db.players)[0] || null; save(); db.current ? go('home') : renderWelcome();
+  };
+  $('#copy').onclick = () => { const t = $('#exp'); t.select(); (navigator.clipboard ? navigator.clipboard.writeText(t.value) : Promise.reject()).then(() => toast('Copied! ✅')).catch(() => { document.execCommand('copy'); toast('Copied! ✅'); }); };
+  $('#load').onclick = () => {
+    try {
+      const q = JSON.parse(decodeURIComponent(escape(atob($('#imp').value.trim()))));
+      if (!q || !q.name || !q.totals) throw 0;
+      if (db.players[q.name] && !confirm(`Replace the current progress for ${q.name} with this backup?`)) return;
+      db.players[q.name] = fixPlayer(q); db.current = q.name; save(); toast(`Welcome back, ${esc(q.name)}! ✅`, true); go('home');
+    } catch(e){ toast('Hmm, that code did not work. Check you copied all of it.'); }
+  };
+};
+
+/* ============ Start ============ */
+for (const n in db.players) fixPlayer(db.players[n]);
+if (db.current && !db.players[db.current]) db.current = null;
+go('home');
+</script>
+</body>
+</html>
